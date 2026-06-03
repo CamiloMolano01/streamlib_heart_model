@@ -1,4 +1,4 @@
-name: esp_datos
+name: streamlit-heart-env
 channels:
   - conda-forge
   - defaults
