@@ -167,5 +167,5 @@ st.dataframe(styled, height=420)
 
 # ======================================== #
 #        Ejecución desde la Terminal       #
-# streamlit run src/housing_pred_stream.py #
+# streamlit run heart_pred_stream.py #
 # ======================================== #

@@ -10,8 +10,14 @@
     conda activate streamlit-heart-env
     ```
 
-2. (Opc2) Instala los paquetes usando pip en tu ambiente:
+2. (Opc2) Instala los paquetes usando pip en tu ambiente *(Python >= 3.11)*:
     ```bash
     cd streamlit_heart_model
-    pip install requirements.txt
+    python3 -m pip install --upgrade pip
+    python3 -m pip install -r requirements.txt
     ```
+
+3. Ejecutar servidor local:
+    ```bash
+   streamlit run heart_pred_stream.py
+   ```
