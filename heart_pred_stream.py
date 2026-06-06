@@ -5,6 +5,7 @@ import streamlit as st
 import pandas as pd
 import joblib
 from pathlib import Path
+import charts
 
 
 # ====================== #
@@ -81,6 +82,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Selección de página
+page = st.sidebar.radio("Navegación", ["Predicción", "Dataset"], index=0)
+
 # ======================================================= #
 # CONFIGURACIÓN DE FILTROS PARA VARIABLES NUMÉRICAS      #
 # Ajusta min_value, max_value, step y value por columna  #
@@ -97,75 +101,76 @@ NUM_CONFIG = {
 # ============================================= #
 # ENTRADAS DE LA BARRA LATERAL (SIDEBAR INPUTS) #
 # ============================================= #
-st.sidebar.markdown(
-    '<p style="font-size:22px; font-weight:700;">📊 Variables de Entrada</p>',
-    unsafe_allow_html=True
-)
+if page == "Predicción":
+    st.sidebar.markdown(
+        '<p style="font-size:22px; font-weight:700;">📊 Variables de Entrada</p>',
+        unsafe_allow_html=True
+    )
 
-input_data = {}
+    input_data = {}
 
-for col in features:
+    for col in features:
 
-    # Numéricas
-    if col in num_cols:
-        cfg = NUM_CONFIG.get(col, {})
-        input_data[col] = st.sidebar.number_input(
-            col,
-            min_value=cfg.get("min_value"),
-            max_value=cfg.get("max_value"),
-            step=cfg.get("step"),
-            value=cfg.get("value", 0.0),
-        )
+        # Numéricas
+        if col in num_cols:
+            cfg = NUM_CONFIG.get(col, {})
+            input_data[col] = st.sidebar.number_input(
+                col,
+                min_value=cfg.get("min_value"),
+                max_value=cfg.get("max_value"),
+                step=cfg.get("step"),
+                value=cfg.get("value", 0.0),
+            )
 
-    # Categóricas
-    elif col in cat_cols:
-        input_data[col] = st.sidebar.selectbox(
-            col,
-            cat_values[col]
-        )
+        # Categóricas
+        elif col in cat_cols:
+            input_data[col] = st.sidebar.selectbox(
+                col,
+                cat_values[col]
+            )
 
-# ===================== #
-# PREDICCIÓN DEL MODELO #
-# ===================== #
-if st.sidebar.button("🔮 Predecir"):
+    # ===================== #
+    # PREDICCIÓN DEL MODELO #
+    # ===================== #
+    if st.sidebar.button("🔮 Predecir"):
 
-    df = pd.DataFrame([input_data])
+        df = pd.DataFrame([input_data])
 
-    try:
-        pred = model.predict(df)[0]
-        enfermedad = "Sí" if pred == 1 else "No"
+        try:
+            pred = model.predict(df)[0]
+            enfermedad = "Sí" if pred == 1 else "No"
 
-        st.success(f"❤️ Predicción de enfermedad cardíaca: {enfermedad}")
+            st.success(f"❤️ Predicción de enfermedad cardíaca: {enfermedad}")
 
-    except Exception as e:
-        st.error(f"Error en la predicción: {e}")
+        except Exception as e:
+            st.error(f"Error en la predicción: {e}")
 
-# ============= #
-# MOSTRAR INPUT #
-# ============= #
+    # ============= #
+    # MOSTRAR INPUT #
+    # ============= #
 
-df_input = pd.DataFrame([input_data]).T
-df_input.columns = ["Valor"]
-df_input["Valor"] = df_input["Valor"].astype(str)
+    df_input = pd.DataFrame([input_data]).T
+    df_input.columns = ["Valor"]
+    df_input["Valor"] = df_input["Valor"].astype(str)
 
-styled = df_input.style \
-    .set_properties(**{
-        'text-align': 'left',
-        'font-size': '14px'
-    }) \
-    .set_table_styles([
-        {'selector': 'th', 'props': [
-            ('font-weight', 'bold'), ('text-align', 'left')]},
-        {'selector': 'td', 'props': [('padding', '6px')]}
-    ])
+    styled = df_input.style \
+        .set_properties(**{
+            'text-align': 'left',
+            'font-size': '14px'
+        }) \
+        .set_table_styles([
+            {'selector': 'th', 'props': [
+                ('font-weight', 'bold'), ('text-align', 'left')]},
+            {'selector': 'td', 'props': [('padding', '6px')]} 
+        ])
 
-st.markdown(
-    '<p style="text-align:center;font-size:22px; font-weight:700;">📄 Datos Ingresados</p>',
-    unsafe_allow_html=True
-)
-st.dataframe(styled, height=420)
+    st.markdown(
+        '<p style="text-align:center;font-size:22px; font-weight:700;">📄 Datos Ingresados</p>',
+        unsafe_allow_html=True
+    )
+    st.dataframe(styled, height=420)
 
-# ======================================== #
-#        Ejecución desde la Terminal       #
-# streamlit run heart_pred_stream.py #
-# ======================================== #
+else:
+    # Página de dataset: mostrar gráficas de todo el dataset en carpeta `data`
+    data_path = BASE_DIR / "data" / "heart.csv"
+    charts.render_dataset_charts(data_path)
